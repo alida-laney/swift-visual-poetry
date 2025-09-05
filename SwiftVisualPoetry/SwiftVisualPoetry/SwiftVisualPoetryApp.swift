@@ -1,3 +1,10 @@
+//
+//  SwiftVisualPoetryApp.swift
+//  SwiftVisualPoetry
+//
+//  Created by Alida on 9/5/25.
+//
+
 import SwiftUI
 
 @main

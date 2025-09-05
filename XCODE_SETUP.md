@@ -16,23 +16,26 @@ Since we can't generate Xcode project files directly, follow these steps to crea
    - Use Core Data: **No** (we'll use local storage)
 
 ### Step 2: Replace Generated Files
-1. Delete the generated `ContentView.swift` and `SwiftVisualPoetryApp.swift`
-2. Copy all files from the `SwiftVisualPoetry/` folder into your Xcode project
-3. Add the files to your Xcode project target
+1. Delete the generated `ContentView.swift` and `SwiftVisualPoetryApp.swift` from your Xcode project
+2. From the repository root, copy these files into your Xcode project:
+   - `SwiftVisualPoetry/SwiftVisualPoetryApp.swift` → Replace the main app file
+   - `SwiftVisualPoetry/Views/ContentView.swift` → Replace ContentView
+   - `SwiftVisualPoetry/Views/CameraView.swift` → Add new file
+   - `SwiftVisualPoetry/Views/GalleryView.swift` → Add new file  
+   - `SwiftVisualPoetry/Views/PersonalGalleryView.swift` → Add new file
+3. In Xcode, create a new group called "Views" and organize the view files there
 
-### Step 3: Project Structure
-Your Xcode project should have this structure:
+### Step 3: Final Project Structure in Xcode
+Your Xcode project should look like this:
 ```
-SwiftVisualPoetry/
+SwiftVisualPoetry (Xcode project)
 ├── SwiftVisualPoetryApp.swift      (Main app entry point)
-├── Views/
+├── Views/                          (Group in Xcode)
 │   ├── ContentView.swift           (Tab navigation)
 │   ├── CameraView.swift           (Camera tab)
 │   ├── GalleryView.swift          (Gallery picker tab)
 │   └── PersonalGalleryView.swift  (Personal gallery tab)
-├── Models/                        (Data models - coming soon)
-├── ViewModels/                    (Business logic - coming soon)
-└── Utils/                         (Helper functions - coming soon)
+└── [Other Xcode generated files]
 ```
 
 ### Step 4: Test the App

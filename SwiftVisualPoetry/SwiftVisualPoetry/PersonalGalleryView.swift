@@ -1,3 +1,10 @@
+//
+//  PersonalGalleryView.swift
+//  SwiftVisualPoetry
+//
+//  Created by Alida on 9/5/25.
+//
+
 import SwiftUI
 
 struct PersonalGalleryView: View {
@@ -22,6 +29,7 @@ struct PersonalGalleryView: View {
                 Text("No photos yet")
                     .foregroundColor(.gray)
                     .italic()
+                    .padding(.bottom, 50)
             }
             .navigationTitle("My Photos")
         }
