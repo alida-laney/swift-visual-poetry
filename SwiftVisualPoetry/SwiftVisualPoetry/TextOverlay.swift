@@ -16,6 +16,7 @@ struct TextOverlay: Identifiable, Equatable {
     var color: Color
     var fontSize: CGFloat
     var fontWeight: Font.Weight
+    var alignment: TextAlignment
     
     init(
         text: String = "Tap to edit",
@@ -24,7 +25,8 @@ struct TextOverlay: Identifiable, Equatable {
         rotation: Double = 0.0,
         color: Color = .white,
         fontSize: CGFloat = 24,
-        fontWeight: Font.Weight = .bold
+        fontWeight: Font.Weight = .bold,
+        alignment: TextAlignment = .center
     ) {
         self.text = text
         self.position = position
@@ -33,5 +35,6 @@ struct TextOverlay: Identifiable, Equatable {
         self.color = color
         self.fontSize = fontSize
         self.fontWeight = fontWeight
+        self.alignment = alignment
     }
 }

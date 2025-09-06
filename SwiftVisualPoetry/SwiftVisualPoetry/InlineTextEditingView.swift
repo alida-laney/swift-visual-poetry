@@ -31,22 +31,31 @@ struct InlineTextEditingView: View {
             VStack(spacing: 25) {
                 Spacer()
                 
-                // Text input area
-                VStack(spacing: 15) {
-                    TextField("Enter your text", text: $editedText, axis: .vertical)
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .focused($isTextFieldFocused)
-                        .lineLimit(1...4)
-                        .padding(.horizontal, 20)
-                    
-                    // Live preview of the text
-                    Text(editedText.isEmpty ? "Your text here" : editedText)
-                        .font(.system(size: textOverlay.fontSize, weight: textOverlay.fontWeight))
-                        .foregroundColor(textOverlay.color)
-                        .padding(.horizontal, 20)
-                        .opacity(editedText.isEmpty ? 0.5 : 1.0)
+                // Combined text input and preview area
+                VStack(spacing: 20) {
+                    ZStack {
+                        // Placeholder when empty
+                        if editedText.isEmpty {
+                            VStack {
+                                Text("Tap to type")
+                                    .font(.system(size: textOverlay.fontSize, weight: textOverlay.fontWeight))
+                                    .foregroundColor(textOverlay.color.opacity(0.5))
+                                    .multilineTextAlignment(textOverlay.alignment)
+                                Spacer()
+                            }
+                        }
+                        
+                        // Actual text editor for multiline support
+                        TextEditor(text: $editedText)
+                            .font(.system(size: textOverlay.fontSize, weight: textOverlay.fontWeight))
+                            .foregroundColor(textOverlay.color)
+                            .multilineTextAlignment(textOverlay.alignment)
+                            .focused($isTextFieldFocused)
+                            .scrollContentBackground(.hidden)
+                            .background(Color.clear)
+                    }
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 20)
                 }
                 
                 Spacer()
@@ -65,6 +74,23 @@ struct InlineTextEditingView: View {
                         ColorPickerButton(color: .pink, selectedColor: $textOverlay.color)
                     }
                     .padding(.horizontal, 20)
+                }
+                
+                // Text alignment picker
+                VStack(spacing: 10) {
+                    HStack {
+                        Text("Alignment")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 40)
+                    
+                    HStack(spacing: 15) {
+                        AlignmentButton(alignment: .leading, selectedAlignment: $textOverlay.alignment, icon: "text.alignleft")
+                        AlignmentButton(alignment: .center, selectedAlignment: $textOverlay.alignment, icon: "text.aligncenter")
+                        AlignmentButton(alignment: .trailing, selectedAlignment: $textOverlay.alignment, icon: "text.alignright")
+                    }
                 }
                 
                 // Size and weight controls
@@ -146,6 +172,28 @@ struct ColorPickerButton: View {
             .onTapGesture {
                 selectedColor = color
             }
+    }
+}
+
+struct AlignmentButton: View {
+    let alignment: TextAlignment
+    @Binding var selectedAlignment: TextAlignment
+    let icon: String
+    
+    var body: some View {
+        Button(action: {
+            selectedAlignment = alignment
+        }) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundColor(selectedAlignment == alignment ? .black : .white)
+                .frame(width: 50, height: 40)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(selectedAlignment == alignment ? Color.white : Color.clear)
+                        .stroke(Color.white, lineWidth: 1)
+                )
+        }
     }
 }
 
