@@ -9,13 +9,17 @@ import SwiftUI
 
 struct DraggableTextView: View {
     @Binding var textOverlay: TextOverlay
+    let alignmentManager: AlignmentGuideManager
+    let canvasSize: CGSize
+    let allTextOverlays: [TextOverlay]
+    let onTap: () -> Void
+    
     @State private var dragOffset = CGSize.zero
     @State private var magnification: CGFloat = 1.0
     @State private var isDragging = false
     @State private var isResizing = false
     @State private var initialScale: CGFloat = 1.0
     @State private var dragStartLocation = CGPoint.zero
-    let onTap: () -> Void
     
     var body: some View {
         Text(textOverlay.text)
@@ -31,49 +35,50 @@ struct DraggableTextView: View {
                 onTap()
             }
             .gesture(
-                DragGesture(coordinateSpace: .global)
+                DragGesture()
                     .onChanged { value in
-                        let isOptionPressed = NSEvent.modifierFlags.contains(.option)
+                        isDragging = true
+                        dragOffset = value.translation
                         
-                        if isOptionPressed {
-                            // Resize mode - vertical drag changes size
-                            if !isResizing {
-                                isResizing = true
-                                initialScale = textOverlay.scale
-                                dragStartLocation = value.startLocation
-                            }
-                            
-                            let verticalChange = value.location.y - dragStartLocation.y
-                            let sensitivity: CGFloat = 0.01
-                            let scaleMultiplier = 1.0 + (verticalChange * sensitivity)
-                            let newScale = initialScale * scaleMultiplier
-                            
-                            magnification = max(0.3, min(newScale, 3.0)) / textOverlay.scale
-                        } else {
-                            // Move mode - drag repositions text
-                            if !isDragging {
-                                isDragging = true
-                            }
-                            dragOffset = value.translation
-                        }
+                        // Calculate potential new position
+                        let potentialPosition = CGPoint(
+                            x: textOverlay.position.x + value.translation.width,
+                            y: textOverlay.position.y + value.translation.height
+                        )
+                        
+                        // Create a temporary text overlay with the new position for guide calculations
+                        var tempOverlay = textOverlay
+                        tempOverlay.position = potentialPosition
+                        
+                        // Update alignment guides
+                        alignmentManager.updateGuides(
+                            for: tempOverlay,
+                            in: canvasSize,
+                            with: allTextOverlays
+                        )
                     }
                     .onEnded { value in
-                        let isOptionPressed = NSEvent.modifierFlags.contains(.option)
+                        isDragging = false
                         
-                        if isResizing && isOptionPressed {
-                            // Apply resize
-                            textOverlay.scale *= magnification
-                            textOverlay.scale = max(0.3, min(textOverlay.scale, 3.0))
-                            magnification = 1.0
-                            isResizing = false
-                        } else if isDragging {
-                            // Apply movement
-                            textOverlay.position = CGPoint(
-                                x: textOverlay.position.x + value.translation.width,
-                                y: textOverlay.position.y + value.translation.height
-                            )
-                            dragOffset = .zero
-                            isDragging = false
+                        // Calculate final position
+                        let newPosition = CGPoint(
+                            x: textOverlay.position.x + value.translation.width,
+                            y: textOverlay.position.y + value.translation.height
+                        )
+                        
+                        // Apply snapping if guides are active
+                        let snappedPosition = alignmentManager.snapPosition(
+                            newPosition,
+                            to: alignmentManager.activeGuides
+                        )
+                        
+                        // Update text position
+                        textOverlay.position = snappedPosition
+                        dragOffset = .zero
+                        
+                        // Clear guides after a short delay
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            alignmentManager.clearGuides()
                         }
                     }
             )
@@ -82,11 +87,17 @@ struct DraggableTextView: View {
 
 #Preview {
     @Previewable @State var sampleOverlay = TextOverlay(text: "Sample Text")
+    @Previewable @StateObject var alignmentManager = AlignmentGuideManager()
     
     ZStack {
         Color.black.ignoresSafeArea()
         
-        DraggableTextView(textOverlay: $sampleOverlay) {
+        DraggableTextView(
+            textOverlay: $sampleOverlay,
+            alignmentManager: alignmentManager,
+            canvasSize: CGSize(width: 400, height: 600),
+            allTextOverlays: []
+        ) {
             print("Text tapped")
         }
     }

@@ -13,6 +13,7 @@ struct PhotoEditorView: View {
     @State private var textOverlays: [TextOverlay] = []
     @State private var isEditingText = false
     @State private var editingIndex: Int?
+    @StateObject private var alignmentManager = AlignmentGuideManager()
     
     var body: some View {
         GeometryReader { geometry in
@@ -27,10 +28,20 @@ struct PhotoEditorView: View {
                 
                 // Text overlays
                 ForEach(Array(textOverlays.enumerated()), id: \.element.id) { index, overlay in
-                    DraggableTextView(textOverlay: $textOverlays[index]) {
+                    DraggableTextView(
+                        textOverlay: $textOverlays[index],
+                        alignmentManager: alignmentManager,
+                        canvasSize: geometry.size,
+                        allTextOverlays: textOverlays
+                    ) {
                         editText(at: index)
                     }
                     .opacity(isEditingText ? 0.3 : 1.0)
+                }
+                
+                // Alignment guides
+                ForEach(alignmentManager.activeGuides) { guide in
+                    AlignmentGuideView(guide: guide, canvasSize: geometry.size)
                 }
                 
                 // Controls (hide when editing)
